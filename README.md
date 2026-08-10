@@ -112,14 +112,13 @@ The AI's version is in [`ai-version/`](ai-version/).
 
 ### What the AI did better
 
-**Used a dictionary keyed by ID instead of a list.** [Explain: your version
-loops over every task to find one; a dict looks it up directly. Why that
-matters as the collection grows.]
+**Used a dictionary keyed by ID instead of a list.** 
 
-**Handled partial updates with `model_dump(exclude_unset=True)` and
-`model_copy(update=...)`.** [Explain: this returns only the fields the client
-actually sent, so omitted fields are left untouched automatically. Compare to
-your per-field `is not None` checks — and note this took you six revisions.]
+My version loops over every task to find one. A dict looks it up directly.
+
+**Handled partial updates with `model_dump(exclude_unset=True)` and `model_copy(update=...)`.** 
+
+This returns only the fields the client actually sent, so omitted fields are left untouched automatically.
 
 ### What it got wrong or ignored
 
@@ -132,15 +131,8 @@ your per-field `is not None` checks — and note this took you six revisions.]
 | `GET /health` | `200` | `404` — not implemented |
 | `GET /tasks/99` | `404` + `{"error": ...}` | `404` + `{"detail": ...}` |
 
-It also produced a file named `ai_main.py`, which Python cannot import —
-module names can't contain hyphens. [One sentence: it followed your filename
-instruction exactly, into a file that doesn't run.]
-
 ### What my prompt forgot to specify
 
-[Write this yourself — it's the actual conclusion. Cover: you named the four
-methods but no status codes; no schema; no seed data; only five of your seven
-endpoints; no error body shape; no validation rule. Then the point: every
-difference in the table above traces to a gap in the prompt, not to the AI
-being wrong. It got 201, 204 and 404 right without being told, because those
-are strong conventions — everything unconventional it invented, reasonably.]
+[I named the four methods but no status codes, no schema, no seed data, only five of my seven endpoints, no error body shape, no validation rule. 
+The point is that every difference in the table above traces to a gap in the prompt, not to the AI being wrong. 
+It got 201, 204 and 404 right without being told, because those are strong conventions, everything unconventional it invented, reasonably.]

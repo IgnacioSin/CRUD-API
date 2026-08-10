@@ -5,7 +5,7 @@ from fastapi import Request
 from pydantic import BaseModel
 
 # ============================================================
-# Base models for request validation
+# Base models
 # ============================================================
 
 class TaskCreate(BaseModel):
@@ -14,6 +14,11 @@ class TaskCreate(BaseModel):
 class TaskUpdate(BaseModel):
     title: str | None = None
     done: bool | None = None
+
+class Task(BaseModel):
+    id: int
+    title: str
+    done: bool
 
 # ============================================================
 # IN-MEMORY data store
@@ -33,11 +38,11 @@ next_id = 4
 
 app = FastAPI()
 
-@app.get("/")
+@app.get("/", summary="Root endpoint", description="Returns basic information about the API")
 def root():
     return { "name": "Task API", "version": "1.0", "endpoints": ["/tasks"] }
 
-@app.get("/health")
+@app.get("/health", summary="Health check endpoint", description="Returns the health status of the API")
 def health():
     return { "status": "ok" }
 
@@ -52,12 +57,12 @@ def http_exception_handler(request: Request, exc: HTTPException):
         content={"error": exc.detail},
     )
 
-@app.get("/tasks")
+@app.get("/tasks", response_model = list[Task], summary="Get all tasks", description="Returns a list of all tasks")
 def get_tasks():
     return list_of_tasks
 
 
-@app.get("/tasks/{id}")
+@app.get("/tasks/{id}", response_model=Task, summary="Get a task by ID", description="Returns a single task by its ID")
 def get_task(id: int):
     for task_stored in list_of_tasks:
         if task_stored["id"] == id:
@@ -68,7 +73,7 @@ def get_task(id: int):
 # Stage 3 create endpoint with validation
 # ============================================================
 
-@app.post("/tasks", status_code=201)
+@app.post("/tasks", status_code=201, summary="Create a new task", description="Creates a new task with the provided title")
 def create_task(task: TaskCreate):
 
     if not task.title or not task.title.strip():
@@ -86,10 +91,10 @@ def create_task(task: TaskCreate):
     return new_task
 
 # ============================================================
-# Stage 4 
+# Stage 4 update and delete endpoints
 # ============================================================
 
-@app.put("/tasks/{id}", status_code=200)
+@app.put("/tasks/{id}", status_code=200, summary="Update a task", description="Updates a task with the provided ID")
 def update_task(id: int, task: TaskUpdate):
 
     if task.title is None and task.done is None: 
@@ -113,7 +118,7 @@ def update_task(id: int, task: TaskUpdate):
     raise HTTPException(status_code=404, detail=f"Task {id} not found")
 
 
-@app.delete("/tasks/{id}", status_code=204)
+@app.delete("/tasks/{id}", status_code=204, summary="Delete a task", description="Deletes a task with the provided ID")
 def delete_task(id: int):
     for task_stored in list_of_tasks:
         if task_stored["id"] == id:

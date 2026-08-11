@@ -20,18 +20,6 @@ class Task(BaseModel):
     done: bool
 
 # ============================================================
-# IN-MEMORY data store
-# ============================================================
-
-list_of_tasks = [
-    { "id": 1, "title": "Go Gym", "done": False },
-    { "id": 2, "title": "Buy Groceries", "done": False },
-    { "id": 3, "title": "Walk the Dog", "done": False }
-]
-
-next_id = 4
-
-# ============================================================
 # Database initialization
 # ============================================================
 
@@ -145,31 +133,44 @@ def create_task(task: TaskCreate):
 @app.put("/tasks/{id}", status_code=200, summary="Update a task", description="Updates a task with the provided ID")
 def update_task(id: int, task: TaskUpdate):
 
-    if task.title is None and task.done is None: 
-        raise HTTPException(status_code=400, detail="Done status is missing")
-    
+    if task.title is None and task.done is None:
+        raise HTTPException(status_code=400, detail="At least one of title or done must be provided")
+
     if task.title is not None and not task.title.strip():
         raise HTTPException(status_code=400, detail="Title is missing")
     
-    for task_stored in list_of_tasks:
-        
-        if task_stored["id"] == id:
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
 
-            if task.title is not None:
-                task_stored["title"] = task.title
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (id,))
+    row = cursor.fetchone()
 
-            if task.done is not None:
-                task_stored["done"] = task.done
-            
-            return task_stored
-    
-    raise HTTPException(status_code=404, detail=f"Task {id} not found")
+    if row is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail=f"Task {id} not found")
+
+    new_title = task.title if task.title is not None else row[1]
+    new_done = task.done if task.done is not None else bool(row[2])
+
+    cursor.execute("UPDATE tasks SET title = ?, done = ? WHERE id = ?", (new_title, int(new_done), id))
+
+    conn.commit()
+    conn.close()
+
+    return {"id": id, "title": new_title, "done": new_done}
 
 
 @app.delete("/tasks/{id}", status_code=204, summary="Delete a task", description="Deletes a task with the provided ID")
 def delete_task(id: int):
-    for task_stored in list_of_tasks:
-        if task_stored["id"] == id:
-            list_of_tasks.remove(task_stored)
-            return
-    raise HTTPException(status_code=404, detail=f"Task {id} not found")
+
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (id,))
+
+    conn.commit()
+    deleted_count = cursor.rowcount
+    conn.close()
+
+    if deleted_count == 0:
+        raise HTTPException(status_code=404, detail=f"Task {id} not found")

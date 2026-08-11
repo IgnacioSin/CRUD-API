@@ -87,15 +87,33 @@ def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.get("/tasks", response_model = list[Task], summary="Get all tasks", description="Returns a list of all tasks")
 def get_tasks():
-    return list_of_tasks
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM tasks")
+    rows = cursor.fetchall()
+
+    tasks = []
+    for row in rows:
+        tasks.append({"id": row[0], "title": row[1], "done": bool(row[2])})
+
+    conn.close()
+    return tasks
 
 
 @app.get("/tasks/{id}", response_model=Task, summary="Get a task by ID", description="Returns a single task by its ID")
 def get_task(id: int):
-    for task_stored in list_of_tasks:
-        if task_stored["id"] == id:
-            return task_stored
-    raise HTTPException(status_code=404, detail=f"Task {id} not found")
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row is None:
+        raise HTTPException(status_code=404, detail=f"Task {id} not found")
+
+    return {"id": row[0], "title": row[1], "done": bool(row[2])}
 
 # ============================================================
 # Stage 3 create endpoint with validation

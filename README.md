@@ -136,3 +136,17 @@ This returns only the fields the client actually sent, so omitted fields are lef
 [I named the four methods but no status codes, no schema, no seed data, only five of my seven endpoints, no error body shape, no validation rule. 
 The point is that every difference in the table above traces to a gap in the prompt, not to the AI being wrong. 
 It got 201, 204 and 404 right without being told, because those are strong conventions, everything unconventional it invented, reasonably.]
+
+## SQL
+
+The database can be inspected and modified directly with DB Browser for SQLite,
+independently of the API.
+
+```sql
+UPDATE tasks SET done = 1;
+```
+
+This marked every task as completed — with no `WHERE` clause, the update applies
+to every row in the table. Running `GET /tasks` immediately afterwards reflected
+the change without restarting the server, because the API and DB Browser read
+the same `tasks.db` file.

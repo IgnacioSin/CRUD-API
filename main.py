@@ -87,6 +87,7 @@ def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.get("/tasks", response_model = list[Task], summary="Get all tasks", description="Returns a list of all tasks")
 def get_tasks():
+
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
 
@@ -103,6 +104,7 @@ def get_tasks():
 
 @app.get("/tasks/{id}", response_model=Task, summary="Get a task by ID", description="Returns a single task by its ID")
 def get_task(id: int):
+
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
 
@@ -123,18 +125,18 @@ def get_task(id: int):
 def create_task(task: TaskCreate):
 
     if not task.title or not task.title.strip():
-            raise HTTPException(status_code=400, detail="Title is missing")
+        raise HTTPException(status_code=400, detail="Title is missing")
+    
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
 
-    global next_id
-    new_task = {
-        "id": next_id,
-        "title": task.title,
-        "done": False
-    }
-    next_id += 1
+    cursor.execute("INSERT INTO tasks (title, done) VALUES (?, ?)", (task.title, 0))
 
-    list_of_tasks.append(new_task)
-    return new_task
+    conn.commit()
+    new_id = cursor.lastrowid
+    conn.close()
+
+    return {"id": new_id, "title": task.title, "done": False}
 
 # ============================================================
 # Stage 4 update and delete endpoints

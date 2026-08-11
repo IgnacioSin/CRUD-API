@@ -1,8 +1,7 @@
-from fastapi import FastAPI
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from fastapi import Request
 from pydantic import BaseModel
+import sqlite3
 
 # ============================================================
 # Base models
@@ -33,10 +32,39 @@ list_of_tasks = [
 next_id = 4
 
 # ============================================================
+# Database initialization
+# ============================================================
+
+def init_db():
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS tasks (
+        id INTEGER PRIMARY KEY,
+        title TEXT NOT NULL,
+        done INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+
+    cursor.execute("SELECT COUNT(*) FROM tasks")
+    count = cursor.fetchone()[0]
+
+    if count == 0:
+        cursor.execute("INSERT INTO tasks (title, done) VALUES (?, ?)", ("Go Gym", 0))
+        cursor.execute("INSERT INTO tasks (title, done) VALUES (?, ?)", ("Buy Groceries", 0))
+        cursor.execute("INSERT INTO tasks (title, done) VALUES (?, ?)", ("Walk the Dog", 0))
+
+    conn.commit()
+    conn.close()
+
+# ============================================================
 # Stage 1 root and health endpoints
 # ============================================================
 
 app = FastAPI()
+
+init_db() # Initialize the database and create the tasks table if it doesn't exist
 
 @app.get("/", summary="Root endpoint", description="Returns basic information about the API")
 def root():

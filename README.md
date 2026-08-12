@@ -164,3 +164,17 @@ This returns only the fields the client actually sent, so omitted fields are lef
 I named the four methods but no status codes, no schema, no seed data, only five of my seven endpoints, no error body shape, no validation rule. 
 The point is that every difference in the table above traces to a gap in the prompt, not to the AI being wrong. 
 It got 201, 204 and 404 right without being told, because those are strong conventions, everything unconventional it invented, reasonably.
+
+## Database (A3)
+
+Postgres runs in a Docker container, no local install needed.
+
+Command to create the container: 
+
+```bash
+docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql/data -d postgres:17
+```
+
+If you put only the name as a parameter ('postgres' in this case) it finds the latest version. It does `'name':latest`.
+
+Used postgres:17 rather than postgres latest version because of the data directory layout. :17 version stores its data in `/var/lib/postgresql/data` that matches with the path in the command above, while the latest version may not.

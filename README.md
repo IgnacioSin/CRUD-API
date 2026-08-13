@@ -22,7 +22,7 @@ cp .env.example .env
 docker compose up
 ```
 
-## Storage
+## Storage (NOT like this anymore)
 
 **Why SQLite?**
 

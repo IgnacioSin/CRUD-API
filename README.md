@@ -1,6 +1,6 @@
 # Task API
 
-**CRUD API for managing tasks, backed by a SQLite database.** This was made as a part of an assignment for FlyRank's professional internship.
+**CRUD API for managing tasks, backed by a Postgres in Docker database.** This was made as a part of an assignment for FlyRank's professional internship.
 
 *The list of tasks comes with three initial tasks*
 
@@ -8,48 +8,19 @@
 
 ## Requirements
 
-Python 3.10+
+Docker
 
 ## Installation & running
 
 ```bash
 git clone https://github.com/IgnacioSin/CRUD-API.git
+
 cd CRUD-API
-python -m venv .venv
+
+cp .env.example .env
+
+docker compose up
 ```
-
-Activate the virtual environment:
-
-```bash
-# Windows (PowerShell)
-.venv\Scripts\Activate.ps1
-
-# Windows (Git Bash)
-source .venv/Scripts/activate
-
-# macOS / Linux
-source .venv/bin/activate
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Start the server:
-
-```bash
-python -m uvicorn main:app --reload
-```
-
-Alternatively, using the FastAPI CLI:
-
-```bash
-fastapi dev main.py
-```
-
-The API runs at `http://localhost:8000`.
 
 ## Storage
 
@@ -76,26 +47,6 @@ All the data lives in `tasks.db`, created automatically, git-ignored so each clo
 |`PUT /tasks/{id}`|Updates a task with the provided ID|`200`|`400` or `404`|
 |`DELETE /tasks/{id}`|Deletes a task with the provided ID|`204`|`404`|
 
-## Example request
-
-**Input:**
-
-```bash
-curl -i -X POST http://localhost:8000/tasks -H "Content-Type: application/json" -d '{"title":"New Task"}'
-```
-
-**Output:**
-
-```http
-HTTP/1.1 201 Created
-date: Mon, 10 Aug 2026 09:55:34 GMT
-server: uvicorn
-content-length: 40
-content-type: application/json
-
-{"id":4,"title":"New Task","done":false}
-```
-
 ## Interactive documentation
 
 Interactive docs at `http://localhost:8000/docs`
@@ -103,9 +54,6 @@ Interactive docs at `http://localhost:8000/docs`
 ![Swagger UI](docs/swagger.png)
 
 ## Known limitations
-
-SQLite allows one writer at a time. The DB connection is opened per-request 
-in each route handler rather than in a single storage module.
 
 Validation errors raised by FastAPI itself (for example, a non-integer ID)
 return a `422` with a `detail` field, while the API's own errors return `400`
@@ -212,3 +160,19 @@ curl -i -X DELETE http://localhost:8000/tasks/4
 # Delete unknown id → 404
 curl -i -X DELETE http://localhost:8000/tasks/999
 ```
+
+## Curl Example
+
+```http
+HTTP/1.1 200 OK
+date: Thu, 13 Aug 2026 05:42:06 GMT
+server: uvicorn
+content-length: 180
+content-type: application/json
+
+[{"id":1,"title":"Go Gym","done":false},{"id":2,"title":"Buy Groceries","done":false},{"id":3,"title":"Walk the Dog","done":false},{"id":4,"title":"Persistence test","done":false}]
+```
+
+### Docker running image
+
+![Docker](docs/dockerDB.png)

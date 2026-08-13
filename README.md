@@ -178,3 +178,37 @@ docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5
 If you put only the name as a parameter ('postgres' in this case) it finds the latest version. It does `'name':latest`.
 
 Used postgres:17 rather than postgres latest version because of the data directory layout. :17 version stores its data in `/var/lib/postgresql/data` that matches with the path in the command above, while the latest version may not.
+
+### Curl Walk
+
+```bash
+# List all tasks
+curl -i http://localhost:8000/tasks
+
+# Get one task
+curl -i http://localhost:8000/tasks/1
+
+# Unknown id → 404
+curl -i http://localhost:8000/tasks/999
+
+# Create → 201
+curl -i -X POST http://localhost:8000/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test task"}'
+
+# Missing title → 400
+curl -i -X POST http://localhost:8000/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":""}'
+
+# Partial update → 200, title preserved
+curl -i -X PUT http://localhost:8000/tasks/1 \
+  -H "Content-Type: application/json" \
+  -d '{"done":true}'
+
+# Delete → 204
+curl -i -X DELETE http://localhost:8000/tasks/4
+
+# Delete unknown id → 404
+curl -i -X DELETE http://localhost:8000/tasks/999
+```

@@ -2,7 +2,7 @@
 
 **CRUD API for managing tasks, backed by a Postgres in Docker database.** This was made as a part of an assignment for FlyRank's professional internship.
 
-*The list of tasks comes with three initial tasks*
+*The list of tasks comes with three initial tasks.*
 
 *The endpoint table, request shapes, and status codes are unchanged from the in-memory version; only the storage layer was replaced.*
 
@@ -38,14 +38,14 @@ All the data lives in `tasks.db`, created automatically, git-ignored so each clo
 ## Endpoints
 
 | Endpoint | Description | Success | Errors |
-|--------|-------------|---------|--------|
-|`GET /`|Returns basic information about the API|`200`||
-|`GET /health`|Returns the health status of the API|`200`||
-|`GET /tasks`|Returns a list of all tasks|`200`||
-|`POST /tasks`|Creates a new task with the provided title|`201`|`400`|
-|`GET /tasks/{id}`|Returns a single task by its ID|`200`|`404`|
-|`PUT /tasks/{id}`|Updates a task with the provided ID|`200`|`400` or `404`|
-|`DELETE /tasks/{id}`|Deletes a task with the provided ID|`204`|`404`|
+| -------- | ------------- | --------- | -------- |
+| `GET /` | Returns basic information about the API | `200` | |
+| `GET /health` | Returns the health status of the API | `200` | |
+| `GET /tasks` | Returns a list of all tasks | `200` | |
+| `POST /tasks` | Creates a new task with the provided title | `201` | `400` |
+| `GET /tasks/{id}` | Returns a single task by its ID | `200` | `404` |
+| `PUT /tasks/{id}` | Updates a task with the provided ID | `200` | `400` or `404` |
+| `DELETE /tasks/{id}` | Deletes a task with the provided ID | `204` | `404` |
 
 ## Interactive documentation
 
@@ -88,18 +88,18 @@ The AI's version is in [`ai-version/`](ai-version/).
 
 ### What the AI did better
 
-**Used a dictionary keyed by ID instead of a list.** 
+**Used a dictionary keyed by ID instead of a list.**
 
 My version loops over every task to find one. A dict looks it up directly.
 
-**Handled partial updates with `model_dump(exclude_unset=True)` and `model_copy(update=...)`.** 
+**Handled partial updates with `model_dump(exclude_unset=True)` and `model_copy(update=...)`.**
 
 This returns only the fields the client actually sent, so omitted fields are left untouched automatically.
 
 ### What it got wrong or ignored
 
 | Behavior | My version | AI version |
-|---|---|---|
+| ---- | ---- | ---- |
 | Fresh `GET /tasks` | 3 seed tasks | `[]` |
 | `POST {}` | `400` + `{"error": ...}` | `422` + `{"detail": [...]}` |
 | Task schema | `id`, `title`, `done` | `id`, `title`, `description`, `completed` |
@@ -109,15 +109,15 @@ This returns only the fields the client actually sent, so omitted fields are lef
 
 ### What my prompt forgot to specify
 
-I named the four methods but no status codes, no schema, no seed data, only five of my seven endpoints, no error body shape, no validation rule. 
-The point is that every difference in the table above traces to a gap in the prompt, not to the AI being wrong. 
+I named the four methods but no status codes, no schema, no seed data, only five of my seven endpoints, no error body shape, no validation rule.
+The point is that every difference in the table above traces to a gap in the prompt, not to the AI being wrong.
 It got 201, 204 and 404 right without being told, because those are strong conventions, everything unconventional it invented, reasonably.
 
 ## Database (A3)
 
 Postgres runs in a Docker container, no local install needed.
 
-Command to create the container: 
+Command to create the container:
 
 ```bash
 docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql/data -d postgres:17
